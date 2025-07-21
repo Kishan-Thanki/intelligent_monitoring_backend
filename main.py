@@ -1,10 +1,9 @@
 import uvicorn
 from fastapi import FastAPI
-from dotenv import load_dotenv
+from app.routers import auth, resources
 from contextlib import asynccontextmanager
-from app.db import connect_to_mongo, close_mongo_connection
+from app.db import connect_to_mongo, close_mongo_connection, db
 
-load_dotenv()
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -22,6 +21,10 @@ app = FastAPI(
 @app.get("/", tags=["Health Check"])
 async def read_root():
     return {"message": "Welcome to the Intelligent Resource Monitoring API!"}
+
+app.include_router(auth.router, prefix="/api/auth", tags=["Authentication & User Management"])
+app.include_router(resources.router, prefix="/api/resources", tags=["Resource Management"])
+
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
